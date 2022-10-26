@@ -8,9 +8,6 @@ OBJS = \
 	$T/token.o \
 	main.o 
 
-$T/%.o: $T/%.c
-	$(CC) $(CFLAGS) -c $< 
-
 MinimumC: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ 
 
