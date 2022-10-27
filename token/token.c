@@ -49,6 +49,23 @@ bool is_match(struct Token *tok, const char *op) {
   return memcmp(tok->loc, op, tok->len) == 0 && op[tok->len] == '\0'; 
 }
 
+// Used for linked list token in parsing. Call is_match to check. 
+bool cur_token(struct Token **rest, struct Token *tok, char *str) {
+  if (is_match(tok, str)) {
+    *rest = tok->next;
+    return true;
+  }
+  *rest = tok;
+  return false;
+}
+
+// Check if current token is `op`, return next token if current is matched.
+struct Token *next_token(struct Token *tok, char *op) {
+  if (!is_match(tok, op))
+    error_tok(tok, "expected '%s'", op);
+  return tok->next;
+}
+
 
 // Create a new token.
 static struct Token *new_token(TK_TYPE type, char *start, char *end) {
