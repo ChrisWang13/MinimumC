@@ -1,5 +1,5 @@
-#ifndef _TOKEN_H_
-#define _TOKEN_H_
+#ifndef TOKEN_H
+#define TOKEN_H
 
 #include <assert.h>
 #include <ctype.h>
@@ -49,26 +49,47 @@ struct Token *split_token(char *input);
 //
 // parse.c
 //
-typedef struct Type Type;
-typedef struct Node Node;
 
 // Variable or function
-typedef struct Obj Obj;
 struct Obj {
-  Obj *next;
-  char *name;       // Variable name
-  bool is_local;    // local or global/function
-  int offset;       // Local variable
-  bool is_function; // Global variable or function
+  struct Obj *next;
+  char *name;         // Variable name
+  struct Type *ty;    // Type
+  bool is_local;      // local or global/function
+
+  // Local variable
+  int offset;
+
+  // Global variable or function
+  bool is_function;
+
+  // Function
+  struct Obj *params;
+  struct Node *body;
+  struct Obj *locals;
+  int stack_size;
 };
 
-// AST node kind, differ from token
+// AST node
 typedef enum {
   ND_ADD,       // +
   ND_SUB,       // -
   ND_MUL,       // *
   ND_DIV,       // /
+  ND_NEG,       // unary -
+  ND_EQ,        // ==
+  ND_NE,        // !=
+  ND_LT,        // <
+  ND_LE,        // <=
+  ND_ASSIGN,    // =
+  ND_ADDR,      // unary &
+  ND_DEREF,     // unary *
   ND_RETURN,    // "return"
+  ND_IF,        // "if"
+  ND_FOR,       // "for" or "while"
+  ND_BLOCK,     // { ... }
+  ND_FUNCALL,   // Function call
+  ND_EXPR_STMT, // Expression statement
   ND_VAR,       // Variable
   ND_NUM,       // Integer
 } NodeKind;
@@ -76,14 +97,60 @@ typedef enum {
 // AST node type
 struct Node {
   NodeKind kind; // Node kind
-  Node *next;    // Next node
+  struct Node *next;    // Next node
+  struct Type *ty;      // Type, e.g. int or pointer to int
   struct Token *tok;    // Representative token
 
-  Node *lhs;     // Left-hand side
-  Node *rhs;     // Right-hand side
+  struct Node *lhs;     // Left-hand side
+  struct Node *rhs;     // Right-hand side
 
-  Obj *var;      // Used if kind == ND_VAR
+  // "if" or "for" statement
+  struct Node *cond;
+  struct Node *then;
+  struct Node *els;
+  struct Node *init;
+  struct Node *inc;
+
+  // Block
+  struct Node *body;
+
+  // Function call
+  char *funcname;
+  struct Node *args;
+
+  struct Obj *var;      // Used if kind == ND_VAR
   int val;       // Used if kind == ND_NUM
 };
 
-#endif // End of _TOKEN_H_
+
+//
+// type.c
+//
+
+typedef enum {
+  TY_INT,
+  TY_PTR,
+  TY_FUNC,
+  TY_ARRAY,
+} TypeKind;
+
+struct Type {
+  TypeKind kind;
+  // Pointer-to or array-of type. 
+  struct Type *base; 
+  // Declaration
+  struct Token *name;
+
+  // Array
+  int array_len;
+
+  // Function type
+  struct Type *return_ty;
+  struct Type *params;
+  struct Type *next;
+};
+
+// Declaration of type "int"
+extern struct Type *ty_int;
+
+#endif // End of TOKEN_H
