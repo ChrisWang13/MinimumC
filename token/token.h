@@ -122,7 +122,6 @@ struct Node {
   int val;       // Used if kind == ND_NUM
 };
 
-
 //
 // type.c
 //
@@ -136,8 +135,11 @@ typedef enum {
 
 struct Type {
   TypeKind kind;
-  // Pointer-to or array-of type. 
-  struct Type *base; 
+  int size;      // sizeof() value
+
+  // Pointer-to or array-of type
+  struct Type *base;
+
   // Declaration
   struct Token *name;
 
@@ -150,7 +152,13 @@ struct Type {
   struct Type *next;
 };
 
-// Declaration of type "int"
 extern struct Type *ty_int;
+
+bool integer_type(struct Type *ty);
+struct Type *copy_type(struct Type *ty);
+struct Type *ptr_type(struct Type *base);
+struct Type *func_type(struct Type *return_ty);
+struct Type *array_type(struct Type *base, int size);
+void add_type(struct Node *node);
 
 #endif // End of TOKEN_H
