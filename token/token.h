@@ -122,6 +122,8 @@ struct Node {
   int val;       // Used if kind == ND_NUM
 };
 
+struct Obj *parse_token(struct Token *tok);
+
 //
 // type.c
 //

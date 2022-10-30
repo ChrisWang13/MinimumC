@@ -9,7 +9,8 @@ static char *input_str;
  **********************************************************************/
 
 // Reports an error and exit.
-void error(char *fmt, ...) {
+void 
+error(char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
@@ -18,7 +19,8 @@ void error(char *fmt, ...) {
 }
 
 // Reports an error location and exit.
-static void verror_at(char *loc, char *fmt, va_list ap) {
+static void 
+verror_at(char *loc, char *fmt, va_list ap) {
   int pos = loc - input_str;
   fprintf(stderr, "%s\n", input_str);
   fprintf(stderr, "%*s", pos, ""); // print pos spaces.
@@ -28,13 +30,15 @@ static void verror_at(char *loc, char *fmt, va_list ap) {
   exit(1);
 }
 
-void error_at(char *loc, char *fmt, ...) {
+void 
+error_at(char *loc, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   verror_at(loc, fmt, ap);
 }
 
-void error_tok(struct Token *tok, char *fmt, ...) {
+void 
+error_tok(struct Token *tok, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   verror_at(tok->loc, fmt, ap);
@@ -45,12 +49,14 @@ void error_tok(struct Token *tok, char *fmt, ...) {
  **********************************************************************/
 
 // Check if token is matched to char* op.
-bool is_match(struct Token *tok, const char *op) {
+bool 
+is_match(struct Token *tok, const char *op) {
   return memcmp(tok->loc, op, tok->len) == 0 && op[tok->len] == '\0'; 
 }
 
 // Used for linked list token in parsing. Call is_match to check. 
-bool cur_token(struct Token **rest, struct Token *tok, char *str) {
+bool 
+cur_token(struct Token **rest, struct Token *tok, char *str) {
   if (is_match(tok, str)) {
     *rest = tok->next;
     return true;
@@ -60,7 +66,8 @@ bool cur_token(struct Token **rest, struct Token *tok, char *str) {
 }
 
 // Check if current token is `op`, return next token if current is matched.
-struct Token *next_token(struct Token *tok, char *op) {
+struct Token *
+next_token(struct Token *tok, char *op) {
   if (!is_match(tok, op))
     error_tok(tok, "expected '%s'", op);
   return tok->next;
@@ -68,39 +75,45 @@ struct Token *next_token(struct Token *tok, char *op) {
 
 
 // Create a new token.
-static struct Token *new_token(TK_TYPE type, char *start, char *end) {
-  struct Token *tok = calloc(1, sizeof(struct Token));
+static struct Token *
+new_token(TK_TYPE type, char *start, char *end) {
+  struct Token *tok = malloc(sizeof(struct Token));
   tok->type = type;
   tok->loc = start;
   tok->len = end - start;
   return tok;
 }
 
-static bool is_startwith(char *p, char *q) {
+static bool 
+is_startwith(char *p, char *q) {
   return strncmp(p, q, strlen(q)) == 0;
 }
 
 // Returns true if c is valid as the first character of an identifier.
 // INVALID: Starts with a special character other than '_'.
 // INVALID: Starts with a digit.
-static bool is_ident1(char c) {
+static bool 
+is_ident1(char c) {
   return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
 }
 
 // Returns true if c is valid as a non-first character of an identifier.
-static bool is_ident2(char c) {
+static bool 
+is_ident2(char c) {
   return is_ident1(c) || ('0' <= c && c <= '9');
 }
 
 // Read a punctuator token from p and returns its length.
-static int read_punct(char *p) {
+static int 
+read_punct(char *p) {
   if (is_startwith(p, "==") || is_startwith(p, "!=") ||
       is_startwith(p, "<=") || is_startwith(p, ">="))
     return 2;
   return ispunct(*p) ? 1 : 0;
 }
 
-static bool is_keyword(struct Token *tok) {
+static bool 
+is_keyword(struct Token *tok) {
   static const char *kw[] = {
     "return", "if", "else", "for", "while", "int",
   };
@@ -112,14 +125,16 @@ static bool is_keyword(struct Token *tok) {
 }
 
 // Indetifier? or keywords?
-static void convert_keywords(struct Token *tok) {
+static void 
+convert_keywords(struct Token *tok) {
   for (struct Token *t = tok; t->type != TK_EOF; t = t->next)
     if (is_keyword(t))
       t->type = TK_KEYWORD;
 }
 
 // Tokenize a given string and returns new tokens.
-struct Token *split_token(char *p) {
+struct Token *
+split_token(char *p) {
   input_str = p;
   struct Token dummy = {}; // Dummy header
   struct Token *cur = &dummy;
