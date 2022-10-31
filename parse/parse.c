@@ -2,8 +2,9 @@
 #include "rules.h"
 
 struct Obj *globals;
+struct Obj *locals;
 
-static char *
+char *
 get_ident(struct Token *tok) {
   if (tok->type != TK_IDENT)
     error_tok(tok, "Expected an identifier");
@@ -27,6 +28,14 @@ new_gvar(char *name, struct Type *ty) {
   return var;
 }
 
+struct Node *
+new_node(NodeKind kind, struct Token *tok) {
+  struct Node *node = malloc(sizeof(struct Node));
+  node->kind = kind;
+  node->tok = tok;
+  return node;
+}
+
 struct Token *
 global_variable(struct Token *tok, struct Type *basety) {
   bool first = true;
@@ -42,6 +51,36 @@ global_variable(struct Token *tok, struct Type *basety) {
   return tok;
 }
 
+// Lookahead tokens and returns true if 
+// a given token is a start
+// of a function definition or declaration.
+bool 
+is_function(struct Token *tok) {
+  if (is_match(tok, ";"))
+    return false;
+
+  struct Type dummy = {};
+  struct Type *ty = declarator(&tok, tok, &dummy);
+  return ty->kind == TY_FUNC;
+}
+
+struct Token *
+function(struct Token *tok, struct Type *basety) {
+  struct Type *ty = declarator(&tok, tok, basety);
+
+  struct Obj *fn = new_gvar(get_ident(ty->name), ty);
+  fn->is_function = true;
+
+  // locals = NULL;
+  // create_param_lvars(ty->params);
+  // fn->params = locals;
+
+  tok = next_token(tok, "{");
+  fn->body = compound_stmt(&tok, tok);
+  // fn->locals = locals;
+  return tok;
+}
+
 // program = (function-definition | global-variable)*
 struct Obj *
 parse_token(struct Token *tok) {
@@ -49,8 +88,11 @@ parse_token(struct Token *tok) {
 
   while (tok->type != TK_EOF) {
     struct Type *basety = declspec(&tok, tok);
-    // TODO: Function
-
+    // Function
+    if (is_function(tok)) {
+      tok = function(tok, basety);
+      continue;
+    }
     // Global variable
     tok = global_variable(tok, basety);
 
