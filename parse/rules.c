@@ -67,10 +67,114 @@ expr_stmt(struct Token **rest, struct Token *tok) {
   }
 
   struct Node *node = new_node(ND_EXPR_STMT, tok);
-  // node->lhs = expr(&tok, tok);
+  node->lhs = expr(&tok, tok);
   *rest = next_token(tok, ";");
   return node;
 }
+
+// expr = assign
+struct Node *
+expr(struct Token **rest, struct Token *tok) {
+  return assign(rest, tok);
+}
+
+// assign = equality ("=" assign)?
+struct Node *
+assign(struct Token **rest, struct Token *tok) {
+  struct Node *node = equality(&tok, tok);
+
+  if (is_match(tok, "="))
+    return new_binary(ND_ASSIGN, node, assign(rest, tok->next), tok);
+
+  *rest = tok;
+  return node;
+}
+
+// equality = relational ("==" relational | "!=" relational)*
+struct Node *equality(struct Token **rest, struct Token *tok) {
+  struct Node *node = relational(&tok, tok);
+
+  for (;;) {
+    struct Token *start = tok;
+
+    if (is_match(tok, "==")) {
+      node = new_binary(ND_EQ, node, relational(&tok, tok->next), start);
+      continue;
+    }
+
+    *rest = tok;
+    return node;
+  }
+}
+
+// relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+struct Node *
+relational(struct Token **rest, struct Token *tok) {
+  struct Node *node = add(&tok, tok);
+  return node;
+}
+
+struct Node *
+add(struct Token **rest, struct Token *tok) {
+  struct Node *node = mul(&tok, tok);
+
+  for (;;) {
+    struct Token *start = tok;
+
+    if (is_match(tok, "+")) {
+      node = new_add(node, mul(&tok, tok->next), start);
+      continue;
+    }
+
+    if (is_match(tok, "-")) {
+      node = new_sub(node, mul(&tok, tok->next), start);
+      continue;
+    }
+
+    *rest = tok;
+    return node;
+  }
+}
+
+// unary = ("+" | "-" | "*") unary
+struct Node *
+unary(struct Token **rest, struct Token *tok) {
+  if (is_match(tok, "+"))
+    return unary(rest, tok->next);
+
+  if (is_match(tok, "-"))
+    return new_unary(ND_NEG, unary(rest, tok->next), tok);
+
+  if (is_match(tok, "*"))
+    return new_unary(ND_DEREF, unary(rest, tok->next), tok);
+
+  exit(0);
+}
+
+
+// mul = unary ("*" unary | "/" unary)*
+struct Node *
+mul(struct Token **rest, struct Token *tok) {
+  struct Node *node = unary(&tok, tok);
+
+  for (;;) {
+    struct Token *start = tok;
+
+    if (is_match(tok, "*")) {
+      node = new_binary(ND_MUL, node, unary(&tok, tok->next), start);
+      continue;
+    }
+
+    if (is_match(tok, "/")) {
+      node = new_binary(ND_DIV, node, unary(&tok, tok->next), start);
+      continue;
+    }
+
+    *rest = tok;
+    return node;
+  }
+}
+
 
 // stmt = "return" expr ";"
 //      | "if" "(" expr ")" stmt ("else" stmt)?
@@ -80,8 +184,14 @@ expr_stmt(struct Token **rest, struct Token *tok) {
 //      | expr-stmt
 struct Node *
 stmt(struct Token **rest, struct Token *tok) {
-  // TODO: RULE 1-3
-  
+  // TODO: RULE 2-3
+  // Rule 1: 
+  if (is_match(tok, "return")) {
+    struct Node *node = new_node(ND_RETURN, tok);
+    node->lhs = expr(&tok, tok->next);
+    *rest = next_token(tok, ";");
+    return node;
+  }
   // Rule 4:
   if (is_match(tok, "{"))
     return compound_stmt(rest, tok->next);

@@ -36,6 +36,57 @@ new_node(NodeKind kind, struct Token *tok) {
   return node;
 }
 
+struct Node *
+new_binary(NodeKind kind, struct Node *lhs, struct Node *rhs, struct Token *tok) {
+  struct Node *node = new_node(kind, tok);
+  node->lhs = lhs;
+  node->rhs = rhs;
+  return node;
+}
+
+struct Node *
+new_unary(NodeKind kind, struct Node *expr, struct Token *tok) {
+  struct Node *node = new_node(kind, tok);
+  node->lhs = expr;
+  return node;
+}
+
+struct Node *
+new_num(int val, struct Token *tok) {
+  struct Node *node = new_node(ND_NUM, tok);
+  node->val = val;
+  return node;
+}
+
+struct Node *
+new_add(struct Node *lhs, struct Node *rhs, struct Token *tok) {
+  add_type(lhs);
+  add_type(rhs);
+
+  // num + num
+  if (integer_type(lhs->ty) && integer_type(rhs->ty))
+    return new_binary(ND_ADD, lhs, rhs, tok);
+
+  if (lhs->ty->base && rhs->ty->base)
+    error_tok(tok, "invalid operands");
+
+  exit(0);
+}
+
+// Like `+`, `-` is overloaded for the pointer type.
+struct Node *
+new_sub(struct Node *lhs, struct Node *rhs, struct Token *tok) {
+  add_type(lhs);
+  add_type(rhs);
+
+  // num - num
+  if (integer_type(lhs->ty) && integer_type(rhs->ty))
+    return new_binary(ND_SUB, lhs, rhs, tok);
+
+  error_tok(tok, "invalid operands");
+  return 0;
+}
+
 struct Token *
 global_variable(struct Token *tok, struct Type *basety) {
   bool first = true;
