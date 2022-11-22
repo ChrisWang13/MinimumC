@@ -18,4 +18,4 @@ clean:
 	rm -f MinimumC *.s res && find . -type f -name '*.o' -delete
 
 test:
-	sudo ./test.sh
+	make && sudo ./test.sh
