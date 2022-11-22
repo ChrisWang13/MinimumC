@@ -1,8 +1,8 @@
 #include "token/token.h"
 
 // Set Debug mode to non-zoro to enable debug.
-#define DEBUG_TOKEN 1
-#define DEBUG_PARSE 1
+#define DEBUG_TOKEN 0
+#define DEBUG_PARSE 0
 
 int main(int argc, char **argv) {
   if (argc != 2)
@@ -12,6 +12,8 @@ int main(int argc, char **argv) {
   struct Token* tok = split_token(argv[1]);
   // Parse token
   struct Obj *obj = parse_token(tok);
+  // Generate naive x86 code
+  codegen(obj);
 
 #if DEBUG_TOKEN
   printf("----------------------------------------------\n");

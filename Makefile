@@ -2,7 +2,7 @@ T = token
 P = parse
 C = codegen
 
-CFLAGS = -g  -fno-common 
+CFLAGS = -g -fno-common 
 
 OBJS = \
 	$T/token.o \

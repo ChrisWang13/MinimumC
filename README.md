@@ -6,7 +6,12 @@ MinimumC is a minimum C compiler intended to parse tokens, check grammar correct
 ## Usage
 To compile MinimumC, run `make` in the root folder of this project.
 
-To run MinimumC, run `./MinimumC "YOUR_INPUT_PROGRAM_HERE"` and output of  `printf` will be redirect to asm file.
+To run MinimumC with specific arguments, run `./MinimumC "YOUR_INPUT_PROGRAM_HERE"` and output of  `printf` will be redirect to asm file.
+
+## Testing
+To test the code works, run `make test`. `tesh.sh` is the test
+file, it first generate `lib.o` with gcc options `-x`(specificy input language, here as C),`-c`(no link) from redirect texts.
+Then it checks whether the actual return value and the estimated value are equal.
 
 ## Debugging
 To enable terminal debugging in MinimumC, set
@@ -23,5 +28,5 @@ Since both debugging and code generation print the output to stdout, it is buggy
 
 ## Reference:
 1. C Coding Standard: https://users.ece.cmu.edu/~eno/coding/CCodingStandard.html
-2. Crafting Interpreters:
-https://craftinginterpreters.com/contents.html
+
+2. Crafting Interpreters:https://craftinginterpreters.com/contents.html

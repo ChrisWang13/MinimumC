@@ -163,4 +163,6 @@ struct Type *func_type(struct Type *return_ty);
 struct Type *array_type(struct Type *base, int size);
 void add_type(struct Node *node);
 
+void codegen(struct Obj *prog);
+
 #endif // End of TOKEN_H
