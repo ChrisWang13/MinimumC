@@ -1,8 +1,10 @@
 #include "token/token.h"
+#include "visualize/visualize.h"
 
 // Set Debug mode to non-zoro to enable debug.
 #define DEBUG_TOKEN 0
 #define DEBUG_PARSE 0
+#define VISUALIZE 0
 
 int main(int argc, char **argv) {
   if (argc != 2)
@@ -10,8 +12,18 @@ int main(int argc, char **argv) {
 
   // Split token
   struct Token* tok = split_token(argv[1]);
+
+#if VISUALIZE
+  visualize_tokens(tok);
+#endif
+
   // Parse token
   struct Obj *obj = parse_token(tok);
+
+#if VISUALIZE
+  visualize_ast(obj);
+#endif
+
   // Generate naive x86 code
   codegen(obj);
 

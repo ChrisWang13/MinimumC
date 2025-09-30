@@ -1,14 +1,16 @@
 T = token
 P = parse
 C = codegen
+V = visualize
 
-CFLAGS = -g -fno-common 
+CFLAGS = -g -fno-common
 
 OBJS = \
 	$T/token.o \
 	$P/type.o \
 	$P/parse.o \
 	$C/codegen.o \
+	$V/visualize.o \
 	main.o 
 	
 MinimumC: $(OBJS)

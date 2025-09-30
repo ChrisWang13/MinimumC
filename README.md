@@ -23,8 +23,27 @@ To enable terminal debugging in MinimumC, set
 #define DEBUG_CODEGEN 1
 ```
 
+## Visualization
+To enable colorful visualization of the compilation process, set `VISUALIZE` to value `1` in `main.c`:
+```c
+#define VISUALIZE 1
+```
+
+The visualization provides:
+- **Token Visualization**: Shows all tokens with different colors and shapes:
+  - Keywords (★) in magenta
+  - Identifiers (●) in green
+  - Punctuators (■) in yellow
+  - Numbers (◆) in cyan
+
+- **AST Visualization**: Shows the abstract syntax tree structure with:
+  - Tree structure using Unicode box drawing characters
+  - Different colors and shapes for different node types
+  - Function parameters and local variables
+  - Proper indentation showing parent-child relationships
+
 ## Warning:
-Since both debugging and code generation print the output to stdout, it is buggy to enable debugging while generating asm file. 
+Since both debugging/visualization and code generation print the output to stdout, it is buggy to enable debugging or visualization while generating asm file. 
 
 ## Reference:
 1. C Coding Standard: https://users.ece.cmu.edu/~eno/coding/CCodingStandard.html
